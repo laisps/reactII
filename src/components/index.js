@@ -1,36 +1,46 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from "react";
+import api from "../service/api";
 
-const Index = () =>{
-    const [personagens, setPersonagem] = useState([]) 
-    const [filtroPersonagem, setFiltroPersonagem] = useState([])
-    const [busca, setBusca] = useState('')
 
-    useEffect(()=>{
-        fetch('https://rickandmortyapi.com/api/character')
-            .then(resposta => resposta.json())
-            .then(dados => setPersonagem(dados.results))
-    },[])
+function Main() {
+  const [character, setCharacter] = useState([]);
+  const [filtroPersonagem, setFiltroPersonagem] = useState([]);
+  const [busca, setBusca] = useState("");
 
-    useEffect(()=>{
-        setFiltroPersonagem(
-            personagens.filter(personagem => {
-                return personagem.name.includes(busca)
-            })
-        )
-    },[busca, personagens])
+  useEffect(() => {
+    const dados = async () => {
+      const res = await api.get("characters");
+      const dados = await res.data;
+      setCharacter(dados);
+    };
+    dados();
+  }, []);
 
-    return(
-        <>
-            <input placeholder="Digite um personagem" onChange={e=>{setBusca(e.target.value)}}/>
-            {filtroPersonagem.map(personagem=> (
-                <div key={personagem.id}>
-                    <p>{personagem.name}</p>
-                    <img src={personagem.image} alt={personagem.name}/>
-                </div>
-                
-            ))}
-        </>
-    )
+  useEffect(() => {
+    setFiltroPersonagem(
+      character.filter((repo) => {
+        return repo.name.toLowerCase().includes(busca.toLowerCase());
+      })
+    );
+  }, [busca, character]);
+
+  console.log(character);
+  return (
+    <>
+      <input
+        onChange={(e) => {
+          setBusca(e.target.value);
+        }}
+        placeholder="Digite o nome do personagem"
+      />
+      {filtroPersonagem.map((personagem) => (
+        <div key={personagem.id}>
+          <p>{personagem.name}</p>
+          <img src={personagem.image} alt={personagem.name} width={250}/>
+        </div>
+      ))}
+    </>
+  );
 }
 
-export default Index
+export default Main;
